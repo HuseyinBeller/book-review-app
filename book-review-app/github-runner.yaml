@@ -1,3 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: github-runner
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-runner-secret
+  namespace: github-runner
+type: Opaque
+stringData:
+  RUNNER_TOKEN: "ASSLE2G7AV6BBZ5RQSYJANTINE5NO"  # Replace this with your actual token
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,11 +29,11 @@ spec:
     spec:
       containers:
       - name: runner
-        image: myoung34/github-runner:latest
+        image: summerwind/actions-runner:latest
         env:
         - name: RUNNER_NAME
           value: "minikube-runner"
-        - name: REPO_URL
+        - name: RUNNER_REPO
           value: "HuseyinBeller/book-review-app"
         - name: RUNNER_TOKEN
           valueFrom:
@@ -27,10 +41,15 @@ spec:
               name: github-runner-secret
               key: RUNNER_TOKEN
         - name: RUNNER_WORKDIR
-          value: "/tmp/github-runner"
-        - name: ORG_RUNNER
-          value: "false"
-        - name: LABELS
-          value: "minikube"
+          value: "/runner"
         - name: RUNNER_GROUP
           value: "Default"
+        - name: RUNNER_LABELS
+          value: "minikube"
+        volumeMounts:
+        - mountPath: /runner
+          name: runner-workdir
+      volumes:
+      - name: runner-workdir
+        emptyDir: {}
+
