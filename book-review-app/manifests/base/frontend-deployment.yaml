@@ -1,7 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: book-review
   name: frontend
   labels:
     app: frontend
@@ -24,7 +23,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: book-review
   name: frontend
 spec:
   selector:

@@ -1,7 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: book-review
   name: mongodb
   labels:
     app: mongodb
@@ -30,12 +29,11 @@ spec:
               mountPath: /data/db
       volumes:
         - name: mongo-persistent-storage
-          emptyDir: {} 
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: book-review
   name: mongodb
 spec:
   selector:
@@ -44,4 +42,3 @@ spec:
     - protocol: TCP
       port: 27017
       targetPort: 27017
-  type: ClusterIP
