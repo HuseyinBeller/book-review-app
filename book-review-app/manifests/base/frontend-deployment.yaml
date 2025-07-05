@@ -19,6 +19,9 @@ spec:
           image: huseyinbeller/book-review-frontend:latest
           ports:
             - containerPort: 80
+          env:
+            - name: REACT_APP_API_BASE_URL
+              value: "http://192.168.49.2:30001"  # Replace with your Minikube IP
 ---
 apiVersion: v1
 kind: Service
