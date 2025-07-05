@@ -20,7 +20,7 @@ spec:
         - name: RUNNER_NAME
           value: "minikube-runner"
         - name: RUNNER_REPOSITORY_URL
-          value: "https://github.com/HuseyinBeller/book-review-app"
+          value: "HuseyinBeller/book-review-app"
         - name: RUNNER_TOKEN
           valueFrom:
             secretKeyRef:
@@ -34,5 +34,3 @@ spec:
           value: "minikube"
         - name: RUNNER_GROUP
           value: "Default"
-        securityContext:
-          privileged: true
