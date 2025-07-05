@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: ./apps/backend
+    container_name: backend
+    environment:
+      MONGO_URL: mongodb://root:example@mongodb:27017/
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./apps/frontend
+    container_name: frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data: 
