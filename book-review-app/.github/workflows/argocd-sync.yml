@@ -1,0 +1,27 @@
+name: ArgoCD Sync on Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install ArgoCD CLI
+      run: |
+        curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        chmod +x argocd
+        mv argocd /usr/local/bin/
+
+    - name: Sync ArgoCD app
+      run: |
+        argocd login argocd-server.argocd.svc.cluster.local:443 --username admin --password $ARGOCD_PASSWORD --insecure
+        argocd app sync book-review-app
+      env:
+        ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
