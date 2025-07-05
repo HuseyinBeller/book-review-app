@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: book-review-app
-  namespace: argocd
+  namespace: book-review
 spec:
   project: default
   source:
