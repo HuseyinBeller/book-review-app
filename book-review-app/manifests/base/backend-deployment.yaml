@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: huseyinbeller/book-review-backend:latest
+          image: huseyinbeller/book-review-backend:v1
           ports:
             - containerPort: 3000
           env:
