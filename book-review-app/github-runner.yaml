@@ -10,7 +10,7 @@ metadata:
   namespace: github-runner
 type: Opaque
 stringData:
-  RUNNER_TOKEN: "ASSLE2GQUKCDA675TR3PWWDIOATZA"  # Replace this with your actual token
+  RUNNER_TOKEN: "ASSLE2BMF4776VEUPLKVZJDIOAUNK"  # Replace this with your actual token
 ---
 apiVersion: apps/v1
 kind: Deployment
