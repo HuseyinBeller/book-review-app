@@ -1,6 +1,6 @@
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 19.0"
+  version = "~> 20.0"
 
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
@@ -23,14 +23,10 @@ module "eks" {
       instance_types = var.node_instance_types
       capacity_type  = "ON_DEMAND"
 
-      # Launch template configuration
-      create_launch_template = false
-      launch_template_name   = ""
-
       disk_size = 20
       ami_type  = "AL2_x86_64"
 
-      # Remote access cannot be specified with a launch template
+      # Remote access configuration
       remote_access = {
         ec2_ssh_key               = aws_key_pair.eks_key_pair.key_name
         source_security_group_ids = [aws_security_group.eks_nodes.id]
@@ -38,16 +34,7 @@ module "eks" {
     }
   }
 
-  # aws-auth configmap
-  manage_aws_auth_configmap = true
 
-  aws_auth_users = [
-    {
-      userarn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-      username = "root"
-      groups   = ["system:masters"]
-    },
-  ]
 
   tags = {
     Environment = var.environment
