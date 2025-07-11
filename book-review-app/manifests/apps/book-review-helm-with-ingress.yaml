@@ -41,11 +41,13 @@ spec:
           value: "ClusterIP"
         - name: backend.service.type
           value: "ClusterIP"
-        # MongoDB persistence
+        # MongoDB persistence with EBS storage
         - name: mongodb.persistence.enabled
           value: "true"
         - name: mongodb.persistence.size
-          value: "8Gi"
+          value: "20Gi"
+        - name: mongodb.persistence.storageClass
+          value: "book-review-ebs-gp3"
         # Environment tag for ALB
         - name: global.environment
           value: "dev"

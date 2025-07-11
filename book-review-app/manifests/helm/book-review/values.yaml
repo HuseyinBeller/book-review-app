@@ -98,8 +98,8 @@ mongodb:
   
   persistence:
     enabled: true
-    storageClass: ""
-    size: 8Gi
+    storageClass: "book-review-ebs-gp3"  # Use custom EBS GP3 storage class
+    size: 20Gi  # Increased size for better MongoDB performance
     accessModes:
       - ReadWriteOnce
   

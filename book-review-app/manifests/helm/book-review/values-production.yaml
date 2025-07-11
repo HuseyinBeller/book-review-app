@@ -119,7 +119,7 @@ mongodb:
   
   persistence:
     enabled: true
-    storageClass: "gp2"  # Use appropriate storage class for your cloud provider
+    storageClass: "book-review-ebs-gp3"  # Use custom EBS GP3 storage class with enhanced performance
     size: 50Gi  # Larger storage for production
     accessModes:
       - ReadWriteOnce

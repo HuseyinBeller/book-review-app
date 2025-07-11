@@ -1,5 +1,11 @@
 # Values file for deployment with ALB Ingress
 # This configuration enables both the application and ArgoCD access via single ALB
+#
+# Storage Configuration:
+# - Uses custom EBS GP3 storage class for MongoDB with 3000 IOPS and 125 MB/s throughput
+# - Storage class is created as part of this Helm chart deployment
+# - 20GB volume size optimized for MongoDB performance
+# - Encryption enabled for security compliance
 
 # Global configuration
 global:
@@ -92,8 +98,8 @@ mongodb:
   
   persistence:
     enabled: true
-    storageClass: ""
-    size: 8Gi
+    storageClass: "book-review-ebs-gp3"  # Use custom EBS GP3 storage class
+    size: 20Gi  # Increased size for better MongoDB performance
     accessModes:
       - ReadWriteOnce
 

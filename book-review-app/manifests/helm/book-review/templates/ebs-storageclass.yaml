@@ -1,0 +1,21 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ include "book-review.fullname" . }}-ebs-gp3
+  labels:
+    {{- include "book-review.labels" . | nindent 4 }}
+    component: storage
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  fsType: ext4
+  # Performance settings optimized for MongoDB
+#   iops: "3000"
+#   throughput: "125"
+  # Encryption enabled for security
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Retain 
