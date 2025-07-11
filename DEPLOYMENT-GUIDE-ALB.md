@@ -27,23 +27,20 @@ Internet → ALB (book-review.curtisdev.online) → {
 5. **Domain Management** - Access to `*.curtisdev.online` DNS configuration
 6. **SSL Certificate** - ACM certificate for `*.curtisdev.online` (recommended)
 
-## 🔐 SSL Certificate Setup (Recommended)
+## 🔐 SSL Certificate Setup (Using Existing Certificate)
 
-Before deployment, create an SSL certificate for your domain:
+Since you already have an SSL certificate for `*.curtisdev.online` in AWS Certificate Manager, we'll use that existing certificate:
 
 ```bash
-# Request wildcard certificate for *.curtisdev.online
-aws acm request-certificate \
-  --domain-name "*.curtisdev.online" \
-  --domain-name "curtisdev.online" \
-  --validation-method DNS \
-  --region us-west-2
+# Find your existing certificate ARN
+aws acm list-certificates --region us-west-2 --query 'CertificateSummaryList[?DomainName==`*.curtisdev.online`]'
 
-# Note the certificate ARN from the output
-# Example: arn:aws:acm:us-west-2:123456789012:certificate/abcd1234-efgh-5678-ijkl-9012mnop3456
+# Or check in AWS Console: Certificate Manager → Certificates
+# Look for: *.curtisdev.online
+# Copy the Certificate ARN: arn:aws:acm:us-west-2:203918847014:certificate/1bc0f35e-7458-4e38-8f8f-79f3d811a344
 ```
 
-**Important**: Validate the certificate by adding the required DNS records to your domain.
+**Note**: Your certificate ARN is already configured in the values file: `arn:aws:acm:eu-central-1:203918847014:certificate/1bc0f35e-7458-4e38-8f8f-79f3d811a344`
 
 ## 🚀 Step-by-Step Deployment
 
@@ -72,20 +69,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 # Example output: xY9k2mNvBqL8rZ4t
 ```
 
-### Step 3: Configure SSL Certificate (If Available)
-
-If you have an ACM certificate for `*.curtisdev.online`, update the application:
-
-```bash
-# Edit the ArgoCD application to include your certificate ARN
-kubectl edit application book-review-helm-app-with-ingress -n argocd
-
-# Add this parameter:
-# - name: ingress.certificateArn
-#   value: "arn:aws:acm:us-west-2:123456789012:certificate/your-cert-id"
-```
-
-### Step 4: Deploy Book Review Application with Ingress
+### Step 3: Deploy Book Review Application with Ingress
 
 ```bash
 # Deploy the application with ALB ingress enabled for curtisdev.online
@@ -95,7 +79,7 @@ kubectl apply -f book-review-app/manifests/apps/book-review-helm-with-ingress.ya
 kubectl get application -n argocd book-review-helm-app-with-ingress -w
 ```
 
-### Step 5: Configure DNS
+### Step 4: Configure DNS
 
 ```bash
 # Get ALB hostname
@@ -109,7 +93,7 @@ echo "ALB Hostname: $ALB_HOSTNAME"
 **DNS Configuration Required:**
 - Create a CNAME record: `book-review.curtisdev.online` → `<ALB-HOSTNAME>`
 
-### Step 6: Access Your Applications
+### Step 5: Access Your Applications
 
 Once DNS propagates (5-10 minutes), access your applications:
 
@@ -120,13 +104,11 @@ Once DNS propagates (5-10 minutes), access your applications:
 
 ## 🔧 Configuration Options
 
-### Option 1: With SSL Certificate (Recommended)
+### Option 1: With SSL Certificate (Already Configured)
 
+✅ **Your SSL certificate is already configured** in `values-with-ingress.yaml`:
 ```yaml
-# In book-review-helm-with-ingress.yaml
-parameters:
-  - name: ingress.certificateArn
-    value: "arn:aws:acm:us-west-2:YOUR-ACCOUNT:certificate/YOUR-CERT-ID"
+certificateArn: "arn:aws:acm:eu-central-1:203918847014:certificate/1bc0f35e-7458-4e38-8f8f-79f3d811a344"
 ```
 
 ### Option 2: Without SSL Certificate (HTTP only)
@@ -205,7 +187,7 @@ echo | openssl s_client -connect book-review.curtisdev.online:443 -servername bo
 ### Common Issues
 
 1. **DNS not resolving**: Check CNAME record configuration
-2. **SSL certificate errors**: Verify ACM certificate validation
+2. **SSL certificate errors**: Verify certificate is in the correct region (eu-central-1)
 3. **ArgoCD subpath issues**: Verify `--basehref=/argocd` argument
 4. **504 Gateway Timeout**: Check ALB target group health
 
