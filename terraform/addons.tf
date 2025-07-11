@@ -125,10 +125,11 @@ resource "aws_eks_addon" "ebs_csi_driver" {
 
 # CoreDNS
 resource "aws_eks_addon" "coredns" {
-  cluster_name      = module.eks.cluster_name
-  addon_name        = "coredns"
-  addon_version     = "v1.10.1-eksbuild.1"
-  resolve_conflicts = "OVERWRITE"
+  cluster_name                = module.eks.cluster_name
+  addon_name                  = "coredns"
+  addon_version               = "v1.10.1-eksbuild.1"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
 
   tags = {
     Environment = var.environment
@@ -138,10 +139,11 @@ resource "aws_eks_addon" "coredns" {
 
 # kube-proxy
 resource "aws_eks_addon" "kube_proxy" {
-  cluster_name      = module.eks.cluster_name
-  addon_name        = "kube-proxy"
-  addon_version     = "v1.27.3-eksbuild.1"
-  resolve_conflicts = "OVERWRITE"
+  cluster_name                = module.eks.cluster_name
+  addon_name                  = "kube-proxy"
+  addon_version               = "v1.27.3-eksbuild.1"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
 
   tags = {
     Environment = var.environment
@@ -151,10 +153,11 @@ resource "aws_eks_addon" "kube_proxy" {
 
 # VPC CNI
 resource "aws_eks_addon" "vpc_cni" {
-  cluster_name      = module.eks.cluster_name
-  addon_name        = "vpc-cni"
-  addon_version     = "v1.13.4-eksbuild.1"
-  resolve_conflicts = "OVERWRITE"
+  cluster_name                = module.eks.cluster_name
+  addon_name                  = "vpc-cni"
+  addon_version               = "v1.13.4-eksbuild.1"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
 
   tags = {
     Environment = var.environment
