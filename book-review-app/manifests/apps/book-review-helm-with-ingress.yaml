@@ -1,0 +1,81 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: book-review-helm-app-with-ingress
+  namespace: argocd
+  labels:
+    app: book-review
+    type: helm
+    ingress: enabled
+    domain: curtisdev.online
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/HuseyinBeller/book-review-app.git
+    targetRevision: HEAD
+    path: book-review-app/manifests/helm/book-review
+    helm:
+      # Use the ingress-specific values file
+      valueFiles:
+        - values-with-ingress.yaml  # This includes curtisdev.online configuration
+      
+      # Override specific values via parameters
+      parameters:
+        - name: frontend.image.tag
+          value: "latest"
+        - name: backend.image.tag
+          value: "latest"
+        # Enable ingress with custom domain
+        - name: ingress.enabled
+          value: "true"
+        - name: ingress.scheme
+          value: "internet-facing"
+        - name: ingress.hosts[0].host
+          value: "book-review.curtisdev.online"
+        - name: ingress.argocd.enabled
+          value: "true"
+        - name: ingress.argocd.namespace
+          value: "argocd"
+        # Configure services for ingress
+        - name: frontend.service.type
+          value: "ClusterIP"
+        - name: backend.service.type
+          value: "ClusterIP"
+        # MongoDB persistence
+        - name: mongodb.persistence.enabled
+          value: "true"
+        - name: mongodb.persistence.size
+          value: "8Gi"
+        # Environment tag for ALB
+        - name: global.environment
+          value: "dev"
+        # External DNS annotation
+        - name: ingress.annotations.external-dns\.alpha\.kubernetes\.io/hostname
+          value: "book-review.curtisdev.online"
+      
+      # Optional: specify release name
+      releaseName: book-review
+      
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: book-review
+    
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true  # Use server-side apply for better conflict resolution
+    
+  # Health checks
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas  # Ignore replica differences for HPA
+        
+  # Notifications (optional)
+  # annotations:
+  #   notifications.argoproj.io/subscribe.on-deployed.slack: deployment-channel
+  #   notifications.argoproj.io/subscribe.on-health-degraded.slack: alerts-channel 

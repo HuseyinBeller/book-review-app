@@ -1,0 +1,148 @@
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  environment: "dev"  # Add environment for ingress tags
+
+# Frontend configuration
+frontend:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: huseyinbeller/book-review-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 2
+  
+  service:
+    type: NodePort
+    port: 80
+    targetPort: 80
+    nodePort: ""
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  
+  env:
+    apiBaseUrl: "http://localhost:3001"
+  
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Backend configuration  
+backend:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: huseyinbeller/book-review-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 2
+  
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  
+  env:
+    mongoUrl: "mongodb://mongodb:27017/bookdb"
+  
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# MongoDB configuration
+mongodb:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: mongo
+    tag: "6.0"
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 1
+  
+  service:
+    type: ClusterIP
+    port: 27017
+    targetPort: 27017
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  
+  auth:
+    enabled: true
+    rootUsername: root
+    rootPassword: example
+  
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 8Gi
+    accessModes:
+      - ReadWriteOnce
+  
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Ingress configuration
+ingress:
+  enabled: false  # Set to true to enable ALB ingress
+  scheme: "internet-facing"  # or "internal"
+  sslRedirect: true
+  certificateArn: ""  # Add your ACM certificate ARN if available
+  
+  # ArgoCD integration
+  argocd:
+    enabled: true  # Enable ArgoCD routing through the same ALB
+    namespace: "argocd"  # ArgoCD namespace
+  
+  # Custom hosts (optional)
+  hosts: []
+    # - host: book-review.yourdomain.com
+    #   paths:
+    #     - path: /custom
+    #       pathType: Prefix
+    #       service:
+    #         name: custom-service
+    #         port: 80
+  
+  # Additional annotations
+  annotations: {}
+    # External DNS example:
+    # external-dns.alpha.kubernetes.io/hostname: book-review.yourdomain.com
+
+# Pod Security Context
+podSecurityContext:
+  fsGroup: 2000
+
+# Security Context
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000 

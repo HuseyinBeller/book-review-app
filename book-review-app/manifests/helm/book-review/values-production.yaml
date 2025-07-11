@@ -1,0 +1,141 @@
+# Production values for book-review application
+# Override default values for production deployment
+
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+
+# Frontend configuration
+frontend:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: huseyinbeller/book-review-frontend
+    tag: "v1.0.0"  # Use specific version tag in production
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 3  # Higher replica count for HA
+  
+  service:
+    type: LoadBalancer  # Use LoadBalancer for external access
+    port: 80
+    targetPort: 80
+  
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  
+  env:
+    apiBaseUrl: "https://api.bookreviews.yourdomain.com"  # Production API URL
+  
+  # Anti-affinity for better distribution
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/component
+              operator: In
+              values:
+              - frontend
+          topologyKey: kubernetes.io/hostname
+
+# Backend configuration  
+backend:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: huseyinbeller/book-review-backend
+    tag: "v1.0.0"  # Use specific version tag in production
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 3  # Higher replica count for HA
+  
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+  
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  
+  env:
+    mongoUrl: "mongodb://mongodb:27017/bookdb"
+  
+  # Anti-affinity for better distribution
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/component
+              operator: In
+              values:
+              - backend
+          topologyKey: kubernetes.io/hostname
+
+# MongoDB configuration
+mongodb:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: mongo
+    tag: "6.0"
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 1  # Single instance for now, consider replica set for HA
+  
+  service:
+    type: ClusterIP
+    port: 27017
+    targetPort: 27017
+  
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 1000m
+      memory: 1Gi
+  
+  auth:
+    enabled: true
+    rootUsername: root
+    rootPassword: "example"  # Use Kubernetes secrets in real production
+  
+  persistence:
+    enabled: true
+    storageClass: "gp2"  # Use appropriate storage class for your cloud provider
+    size: 50Gi  # Larger storage for production
+    accessModes:
+      - ReadWriteOnce
+
+# Enhanced security context for production
+podSecurityContext:
+  fsGroup: 2000
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false 

@@ -1,0 +1,23 @@
+{{- if and .Values.mongodb.enabled .Values.mongodb.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "book-review.fullname" . }}-mongodb-pvc
+  labels:
+    {{- include "book-review.mongodb.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- range .Values.mongodb.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.mongodb.persistence.size | quote }}
+  {{- if .Values.mongodb.persistence.storageClass }}
+  {{- if (eq "-" .Values.mongodb.persistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ .Values.mongodb.persistence.storageClass | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }} 

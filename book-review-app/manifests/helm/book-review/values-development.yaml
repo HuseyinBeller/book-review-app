@@ -1,0 +1,107 @@
+# Development values for book-review application
+# Override default values for development/testing
+
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+
+# Frontend configuration
+frontend:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: huseyinbeller/book-review-frontend
+    tag: latest
+    pullPolicy: Always  # Always pull latest for development
+  
+  replicaCount: 1  # Single replica for development
+  
+  service:
+    type: NodePort
+    port: 80
+    targetPort: 80
+    nodePort: 30080  # Fixed port for development
+  
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  
+  env:
+    apiBaseUrl: "http://localhost:30081"  # Local backend API
+
+# Backend configuration  
+backend:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: huseyinbeller/book-review-backend
+    tag: latest
+    pullPolicy: Always  # Always pull latest for development
+  
+  replicaCount: 1  # Single replica for development
+  
+  service:
+    type: NodePort
+    port: 3000
+    targetPort: 3000
+    nodePort: 30081  # Fixed port for development
+  
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  
+  env:
+    mongoUrl: "mongodb://mongodb:27017/bookdb"
+
+# MongoDB configuration
+mongodb:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: mongo
+    tag: "6.0"
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 1
+  
+  service:
+    type: ClusterIP
+    port: 27017
+    targetPort: 27017
+  
+  resources:
+    limits:
+      cpu: 200m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  
+  auth:
+    enabled: true
+    rootUsername: root
+    rootPassword: example
+  
+  persistence:
+    enabled: false  # Disable persistence for development - faster cleanup
+    
+# Relaxed security for development
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000 

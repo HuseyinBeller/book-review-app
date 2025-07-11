@@ -1,0 +1,133 @@
+# Values file for deployment with ALB Ingress
+# This configuration enables both the application and ArgoCD access via single ALB
+
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  environment: "dev"
+
+# Frontend configuration - ClusterIP for ALB
+frontend:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: huseyinbeller/book-review-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 2
+  
+  service:
+    type: ClusterIP  # Use ClusterIP for ALB ingress
+    port: 80
+    targetPort: 80
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  
+  env:
+    apiBaseUrl: "/api"  # Use relative path for ALB routing
+
+# Backend configuration - ClusterIP for ALB
+backend:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: huseyinbeller/book-review-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 2
+  
+  service:
+    type: ClusterIP  # Use ClusterIP for ALB ingress
+    port: 3000
+    targetPort: 3000
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  
+  env:
+    mongoUrl: "mongodb://mongodb:27017/bookdb"
+
+# MongoDB configuration
+mongodb:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: mongo
+    tag: "6.0"
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 1
+  
+  service:
+    type: ClusterIP
+    port: 27017
+    targetPort: 27017
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  
+  auth:
+    enabled: true
+    rootUsername: root
+    rootPassword: example
+  
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 8Gi
+    accessModes:
+      - ReadWriteOnce
+
+# Ingress configuration - ENABLED with custom domain
+ingress:
+  enabled: true  # Enable ALB ingress
+  scheme: "internet-facing"
+  sslRedirect: true
+  certificateArn: "arn:aws:acm:eu-central-1:203918847014:certificate/1bc0f35e-7458-4e38-8f8f-79f3d811a344"  # SSL certificate will be auto-discovered for curtisdev.online
+  
+  # ArgoCD integration
+  argocd:
+    enabled: true  # Enable ArgoCD routing through the same ALB
+    namespace: "argocd"
+  
+  # Custom domain configuration for curtisdev.online
+  hosts:
+    - host: book-review.curtisdev.online
+      paths: []  # Use default paths (/, /api, /argocd)
+  
+  # Additional annotations for External DNS (if you have it configured)
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: book-review.curtisdev.online
+    # Uncomment if you have ACM certificate for *.curtisdev.online
+    # alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-west-2:YOUR-ACCOUNT:certificate/YOUR-CERT-ID"
+
+# Security contexts
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000 
