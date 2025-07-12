@@ -14,62 +14,37 @@ data:
         root /usr/share/nginx/html;
         index index.html index.htm;
 
-        # Serve runtime configuration
-        location /config.json {
-            add_header Content-Type application/json;
-            add_header Access-Control-Allow-Origin *;
-            return 200 '{"apiBaseUrl": "/api"}';
-        }
-
-        # Serve configuration script
-        location /config.js {
-            add_header Content-Type application/javascript;
-            add_header Access-Control-Allow-Origin *;
-            return 200 '
-                (function() {
-                    // Set runtime configuration
-                    window.REACT_APP_API_BASE_URL = "/api";
-                    
-                    // Override fetch to intercept localhost API calls
-                    const originalFetch = window.fetch;
-                    window.fetch = function(url, options) {
-                        if (typeof url === "string") {
-                            if (url.startsWith("http://localhost:3000/api")) {
-                                url = url.replace("http://localhost:3000/api", "/api");
-                            } else if (url.startsWith("localhost:3000/api")) {
-                                url = url.replace("localhost:3000/api", "/api");
-                            }
-                        }
-                        return originalFetch.call(this, url, options);
-                    };
-                    
-                    // Override XMLHttpRequest for axios compatibility
-                    const originalXHROpen = XMLHttpRequest.prototype.open;
-                    XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-                        if (typeof url === "string") {
-                            if (url.startsWith("http://localhost:3000/api")) {
-                                url = url.replace("http://localhost:3000/api", "/api");
-                            } else if (url.startsWith("localhost:3000/api")) {
-                                url = url.replace("localhost:3000/api", "/api");
-                            }
-                        }
-                        return originalXHROpen.call(this, method, url, async, user, password);
-                    };
-                    
-                    console.log("API configuration loaded: API calls will be proxied to /api");
-                })();
-            ';
-        }
-
-        # Serve custom index.html with config script
+        # Serve custom index.html with API fix
         location = / {
-            return 200 '<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Book Review App</title><script src="/config.js"></script><script defer="defer" src="/static/js/main.219b0101.js"></script></head><body><div id="root"></div></body></html>';
             add_header Content-Type text/html;
+            return 200 '<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Book Review App</title><script>
+(function() {
+    const originalOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+        if (typeof url === "string" && url.includes("localhost:3000/api")) {
+            url = url.replace("http://localhost:3000/api", "/api").replace("localhost:3000/api", "/api");
+            console.log("Redirected API call to:", url);
+        }
+        return originalOpen.call(this, method, url, async, user, password);
+    };
+    
+    const originalFetch = window.fetch;
+    window.fetch = function(url, options) {
+        if (typeof url === "string" && url.includes("localhost:3000/api")) {
+            url = url.replace("http://localhost:3000/api", "/api").replace("localhost:3000/api", "/api");
+            console.log("Redirected fetch call to:", url);
+        }
+        return originalFetch.call(this, url, options);
+    };
+    
+    console.log("API interception loaded successfully");
+})();
+</script><script defer="defer" src="/static/js/main.219b0101.js"></script></head><body><div id="root"></div></body></html>';
         }
 
         # Serve static files
         location / {
-            try_files $uri $uri/ =404;
+            try_files $uri $uri/ /index.html;
         }
 
         # Proxy API calls to backend service
