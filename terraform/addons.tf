@@ -15,7 +15,8 @@ module "eks_blueprints_addons" {
   eks_addons = {
     # Enable EBS CSI Driver for persistent volumes
     aws-ebs-csi-driver = {
-      most_recent = true
+      most_recent              = true
+      service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
     }
   }
 
@@ -49,4 +50,24 @@ module "eks_blueprints_addons" {
     data.aws_eks_cluster.cluster,
     data.aws_eks_cluster_auth.cluster
   ]
+}
+
+# EBS CSI Driver IRSA
+module "ebs_csi_driver_irsa" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+
+  role_name             = "${var.name}-ebs-csi-driver"
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    ex = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project_name
+  }
 } 

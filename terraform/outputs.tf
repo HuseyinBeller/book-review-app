@@ -108,6 +108,11 @@ output "aws_load_balancer_controller_role_arn" {
   value       = module.eks_blueprints_addons.aws_load_balancer_controller.iam_role_arn
 }
 
+output "ebs_csi_driver_role_arn" {
+  description = "EBS CSI Driver IAM role ARN"
+  value       = module.ebs_csi_driver_irsa.iam_role_arn
+}
+
 # Current AWS Account ID
 output "current_aws_account_id" {
   description = "Current AWS Account ID"
