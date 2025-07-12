@@ -150,6 +150,7 @@ securityContext:
     - DAC_OVERRIDE # Override file access controls
     - SETGID       # Allow setting group ID
     - SETUID       # Allow setting user ID
+    - NET_BIND_SERVICE  # Allow binding to privileged ports
   readOnlyRootFilesystem: false
   runAsNonRoot: false  # Allow nginx to run as root
   runAsUser: 0         # Run as root for nginx compatibility
