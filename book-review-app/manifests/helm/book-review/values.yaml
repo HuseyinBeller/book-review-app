@@ -136,13 +136,21 @@ ingress:
 
 # Pod Security Context
 podSecurityContext:
-  fsGroup: 2000
+  runAsUser: 0     # Run pod as root
+  runAsGroup: 0    # Run pod as root group
+  fsGroup: 0       # Set filesystem group to root
 
 # Security Context
 securityContext:
   capabilities:
     drop:
     - ALL
+    add:
+    - CHOWN        # Allow changing file ownership
+    - DAC_OVERRIDE # Override file access controls
+    - SETGID       # Allow setting group ID
+    - SETUID       # Allow setting user ID
   readOnlyRootFilesystem: false
-  runAsNonRoot: false  # Allow nginx to run as root if needed
-  runAsUser: 0         # Run as root for nginx compatibility 
+  runAsNonRoot: false  # Allow nginx to run as root
+  runAsUser: 0         # Run as root for nginx compatibility
+  allowPrivilegeEscalation: false 
