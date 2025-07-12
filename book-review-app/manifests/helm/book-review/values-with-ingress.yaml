@@ -65,7 +65,7 @@ backend:
       memory: 256Mi
   
   env:
-    mongoUrl: "mongodb://mongodb:27017/bookdb"
+    mongoUrl: "mongodb://root:example@mongodb:27017/bookdb"
 
 # MongoDB configuration
 mongodb:
