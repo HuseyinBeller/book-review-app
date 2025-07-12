@@ -24,14 +24,28 @@ const Book = mongoose.model('Book', bookSchema);
 
 // Routes
 app.get('/api/books', async (req, res) => {
-  const books = await Book.find();
-  res.json(books);
+  try {
+    console.log('GET /api/books - Fetching books from database');
+    const books = await Book.find();
+    console.log(`Found ${books.length} books`);
+    res.json(books);
+  } catch (error) {
+    console.error('Error fetching books:', error);
+    res.status(500).json({ error: 'Failed to fetch books' });
+  }
 });
 
 app.post('/api/books', async (req, res) => {
-  const book = new Book(req.body);
-  await book.save();
-  res.status(201).json(book);
+  try {
+    console.log('POST /api/books - Creating new book:', req.body);
+    const book = new Book(req.body);
+    await book.save();
+    console.log('Book created successfully:', book);
+    res.status(201).json(book);
+  } catch (error) {
+    console.error('Error creating book:', error);
+    res.status(500).json({ error: 'Failed to create book' });
+  }
 });
 
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
