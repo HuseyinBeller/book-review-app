@@ -65,7 +65,7 @@ backend:
       memory: 256Mi
   
   env:
-    mongoUrl: "mongodb://root:example@book-review-mongodb:27017/bookdb"
+    mongoUrl: "mongodb://book-review-mongodb:27017/bookdb"
 
 # MongoDB configuration
 mongodb:
@@ -92,9 +92,7 @@ mongodb:
       memory: 512Mi
   
   auth:
-    enabled: true
-    rootUsername: root
-    rootPassword: example
+    enabled: false
   
   persistence:
     enabled: true
