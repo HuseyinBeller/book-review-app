@@ -33,7 +33,7 @@ spec:
               protocol: TCP
           env:
             - name: MONGO_URL
-              value: "mongodb://{{ include "book-review.fullname" . }}-mongodb:27017/bookdb"
+              value: {{ .Values.backend.env.mongoUrl | quote }}
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
       {{- with .Values.backend.nodeSelector }}
