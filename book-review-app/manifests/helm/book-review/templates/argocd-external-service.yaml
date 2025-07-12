@@ -1,4 +1,5 @@
 {{- if and .Values.ingress.enabled .Values.ingress.argocd.enabled }}
+# ArgoCD Proxy Service
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,10 +8,86 @@ metadata:
   labels:
     {{- include "book-review.labels" . | nindent 4 }}
 spec:
-  type: ExternalName
-  externalName: argocd-server.{{ .Values.ingress.argocd.namespace }}.svc.cluster.local
+  type: ClusterIP
   ports:
   - port: 80
-    targetPort: 80
+    targetPort: 8080
     protocol: TCP
+  selector:
+    app: argocd-proxy
+---
+# ArgoCD Proxy Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "book-review.labels" . | nindent 4 }}
+    app: argocd-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: argocd-proxy
+  template:
+    metadata:
+      labels:
+        app: argocd-proxy
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: argocd-proxy-config
+---
+# ArgoCD Proxy ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-proxy-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "book-review.labels" . | nindent 4 }}
+data:
+  default.conf: |
+    server {
+        listen 8080;
+        server_name _;
+        
+        location /argocd/ {
+            proxy_pass http://argocd-server.{{ .Values.ingress.argocd.namespace }}.svc.cluster.local/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Accept-Encoding "";
+            
+            # ArgoCD specific headers
+            proxy_set_header X-Forwarded-Host $host;
+            proxy_set_header X-Forwarded-Port $server_port;
+            
+            # Handle ArgoCD UI redirects
+            proxy_redirect ~^http://([^/]+)/(.*) http://$host/argocd/$2;
+            proxy_redirect ~^https://([^/]+)/(.*) https://$host/argocd/$2;
+        }
+        
+        location /argocd {
+            return 301 /argocd/;
+        }
+    }
 {{- end }} 
