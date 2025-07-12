@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/HuseyinBeller/book-review-app.git
-    targetRevision: HEAD
+    targetRevision: kubernetes
     path: manifests/helm/book-review
     helm:
       # Use the ingress-specific values file
