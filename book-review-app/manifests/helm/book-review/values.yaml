@@ -144,5 +144,5 @@ securityContext:
     drop:
     - ALL
   readOnlyRootFilesystem: false
-  runAsNonRoot: true
-  runAsUser: 1000 
+  runAsNonRoot: false  # Allow nginx to run as root if needed
+  runAsUser: 0         # Run as root for nginx compatibility 

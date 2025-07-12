@@ -11,6 +11,14 @@ module "eks_blueprints_addons" {
   # Enable AWS Load Balancer Controller
   enable_aws_load_balancer_controller = true
 
+  # EKS Addons
+  eks_addons = {
+    # Enable EBS CSI Driver for persistent volumes
+    aws-ebs-csi-driver = {
+      most_recent = true
+    }
+  }
+
   # Configure AWS Load Balancer Controller
   aws_load_balancer_controller = {
     chart         = "aws-load-balancer-controller"
