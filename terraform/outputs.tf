@@ -1,3 +1,4 @@
+# EKS Cluster outputs
 output "cluster_id" {
   description = "EKS cluster ID"
   value       = module.eks.cluster_id
@@ -15,7 +16,7 @@ output "cluster_name" {
 
 output "cluster_endpoint" {
   description = "Endpoint for EKS control plane"
-  value       = module.eks.cluster_endpoint
+  value       = data.aws_eks_cluster.cluster.endpoint
 }
 
 output "cluster_security_group_id" {
@@ -30,7 +31,7 @@ output "cluster_iam_role_name" {
 
 output "cluster_certificate_authority_data" {
   description = "Base64 encoded certificate data required to communicate with the cluster"
-  value       = module.eks.cluster_certificate_authority_data
+  value       = data.aws_eks_cluster.cluster.certificate_authority[0].data
 }
 
 output "cluster_primary_security_group_id" {
@@ -84,61 +85,31 @@ output "internet_gateway_id" {
   value       = module.vpc.igw_id
 }
 
-# Security Groups outputs
-output "eks_cluster_security_group_id" {
-  description = "Security group ID for EKS cluster"
-  value       = aws_security_group.eks_cluster.id
-}
-
-output "eks_nodes_security_group_id" {
-  description = "Security group ID for EKS worker nodes"
-  value       = aws_security_group.eks_nodes.id
-}
-
-output "alb_security_group_id" {
-  description = "Security group ID for Application Load Balancer"
-  value       = aws_security_group.alb.id
-}
-
-output "database_security_group_id" {
-  description = "Security group ID for database"
-  value       = aws_security_group.database.id
-}
-
-output "backend_security_group_id" {
-  description = "Security group ID for backend service"
-  value       = aws_security_group.backend.id
-}
-
-output "frontend_security_group_id" {
-  description = "Security group ID for frontend service"
-  value       = aws_security_group.frontend.id
-}
-
-# Key pair
+# Key pair outputs
 output "key_pair_name" {
   description = "The key pair name"
   value       = aws_key_pair.eks_key_pair.key_name
 }
 
-# AWS Load Balancer Controller
+output "private_key_path" {
+  description = "Path to the private key file"
+  value       = local_file.private_key.filename
+}
+
+# EKS Blueprints Addons
+output "eks_blueprints_addons" {
+  description = "EKS Blueprints Addons module outputs"
+  value       = module.eks_blueprints_addons
+  sensitive   = true
+}
+
 output "aws_load_balancer_controller_role_arn" {
   description = "AWS Load Balancer Controller IAM role ARN"
-  value       = module.aws_load_balancer_controller_irsa_role.iam_role_arn
+  value       = module.eks_blueprints_addons.aws_load_balancer_controller.iam_role_arn
 }
 
-# EBS CSI Driver
-output "ebs_csi_driver_role_arn" {
-  description = "EBS CSI Driver IAM role ARN"
-  value       = aws_iam_role.ebs_csi_driver.arn
-}
-
-output "ebs_csi_driver_role_name" {
-  description = "EBS CSI Driver IAM role name"
-  value       = aws_iam_role.ebs_csi_driver.name
-}
-
-output "ebs_csi_addon_version" {
-  description = "EBS CSI Driver addon version"
-  value       = aws_eks_addon.ebs_csi_driver.addon_version
+# Current AWS Account ID
+output "current_aws_account_id" {
+  description = "Current AWS Account ID"
+  value       = data.aws_caller_identity.current.account_id
 } 

@@ -1,27 +1,16 @@
 # AWS Configuration
-aws_region = "eu-central-1"
+aws_region = "us-west-2"
 
 # EKS Cluster Configuration
-cluster_name    = "book-review-eks"
-cluster_version = "1.32"
+name        = "book-review-eks"
+k8s_version = "1.32"
 
 # Network Configuration
 vpc_cidr             = "10.0.0.0/16"
-availability_zones   = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
+availability_zones   = ["us-west-2a", "us-west-2b", "us-west-2c"]
 private_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 public_subnet_cidrs  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 
-# Worker Nodes Configuration
-node_instance_types    = ["t2.medium"]
-node_desired_capacity  = 2
-node_min_capacity      = 2
-node_max_capacity      = 4
-
 # Project Configuration
 environment  = "dev"
-project_name = "book-review"
-
-# EBS CSI Driver Configuration
-ebs_csi_addon_version                = "v1.25.0-eksbuild.1"
-ebs_csi_resolve_conflicts_on_create  = "OVERWRITE"
-ebs_csi_resolve_conflicts_on_update  = "OVERWRITE" 
+project_name = "book-review" 

@@ -3,6 +3,12 @@ resource "kubernetes_namespace" "argocd" {
   metadata {
     name = "argocd"
   }
+
+  depends_on = [
+    module.eks,
+    data.aws_eks_cluster.cluster,
+    data.aws_eks_cluster_auth.cluster
+  ]
 }
 
 # Argo CD Helm chart
@@ -10,7 +16,7 @@ resource "helm_release" "argocd" {
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
-  version    = "5.51.6"          # Pin a stable version
+  version    = "8.1.3"
   namespace  = kubernetes_namespace.argocd.metadata[0].name
 
   # Use ClusterIP since we'll access via ALB ingress
@@ -37,5 +43,10 @@ resource "helm_release" "argocd" {
     value = "https://your-domain.com/argocd"  # Will be updated via ingress
   }
 
-  depends_on = [module.eks]
+  depends_on = [
+    module.eks,
+    data.aws_eks_cluster.cluster,
+    data.aws_eks_cluster_auth.cluster,
+    kubernetes_namespace.argocd
+  ]
 } 

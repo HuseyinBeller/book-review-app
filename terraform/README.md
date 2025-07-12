@@ -15,6 +15,7 @@ This Terraform configuration sets up a complete AWS EKS infrastructure for deplo
 - **EKS Control Plane**: Managed Kubernetes control plane
 - **Worker Nodes**: EKS managed node groups with auto-scaling
 - **Add-ons**: CoreDNS, kube-proxy, VPC CNI, Enhanced EBS CSI driver
+- **EKS Blueprints Addons**: Comprehensive addon management
 - **AWS Load Balancer Controller**: For ingress and load balancing
 - **IRSA Support**: IAM Roles for Service Accounts with OIDC
 
@@ -94,6 +95,7 @@ After successful deployment, Terraform outputs important information:
 - EKS cluster endpoint and certificate authority
 - VPC and subnet IDs
 - Security group IDs
+- EKS Blueprints Addons module outputs
 - Load balancer controller IAM role ARN
 
 ## Post-Deployment Steps
